@@ -509,8 +509,7 @@ if(sys.argv[1] == '--tgcc'):
 				#					STEP IS SAMPLE COPY
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
-#? ERROR ?				CopyFrom = Jobs[ 'SAMPLE'+str(Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']) ]['JOBID']
-					CopyFrom = Jobs[ str(Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']) ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
@@ -838,8 +837,7 @@ if(sys.argv[1] == '--pbs'):
 				#					STEP IS SAMPLE COPY
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
-# TRY FOR CLAIRE ? ERROR					CopyFrom = Jobs[ str(Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']) ]['JOBID']
-					CopyFrom = Jobs[ 'SAMPLE'+str(Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']) ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
@@ -1052,9 +1050,7 @@ if(sys.argv[1] == '--local'):
 	#**********************************************#
 	#*****      Generating MDrun files        *****#
 	#**********************************************#
-	for i in range(1,len(Jobs)+1):
-		sampleNumber = str("""SAMPLE{0}""").format(i)
-		sampleNumber = i
+	for sampleNumber in range(1,len(Jobs)+1):
 		name = Jobs[sampleNumber]['JOBID']
 		print("===============\n===============\nSample "+name+"\n===============\n===============\n")
 		#Creates the sample directory
@@ -1151,7 +1147,7 @@ if(sys.argv[1] == '--local'):
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
 
-					CopyFrom = Jobs[ 'SAMPLE'+str(Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']) ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done \n\n""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
