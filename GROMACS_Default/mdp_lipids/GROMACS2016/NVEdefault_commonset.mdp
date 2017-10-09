@@ -16,9 +16,9 @@ title                    = Martini
 
 
  ; RUN CONTROL PARAMETERS = 
-integrator               = steep
-nsteps                   = 50000
-nstcomm                  = 100
+integrator               = md
+dt                       = 0.025    
+nstcomm                  = 40
 comm-grps		         = System
 
 nstxout                  = 0
