@@ -103,7 +103,7 @@ vdw-modifier             = None
 ; Rahman is prone to oscillating behaviour. For bilayer systems the pressure 
 ; coupling should be done semiisotropic.
 
-tcoupl                   = no
+tcoupl                   = v-rescale
 tc-grps                  = System
 tau-t                    = 1.0   
 ref-t                    = 323  
