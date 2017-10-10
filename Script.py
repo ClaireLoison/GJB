@@ -49,7 +49,7 @@ TGCC = {}
 
 
 with open('Parameters.csv','r') as Input_Params:
-	inputParamsReader = csv.reader(Input_Params, delimiter='|', skipinitialspace=True)
+	inputParamsReader = csv.reader(Input_Params, delimiter=',', skipinitialspace=True)
 	
 	#Variable to keep track of the jobs ordering
 	jobNumber = 0
@@ -177,7 +177,7 @@ with open('Parameters.csv','r') as Input_Params:
 						break
 					
 				with open(PathToDefault+'/DEFO/Parameters_defo.csv','r') as Defo_Params:
-					defoParam = csv.reader(Defo_Params, delimiter='|', skipinitialspace=True)
+					defoParam = csv.reader(Defo_Params, delimiter=',', skipinitialspace=True)
 					Jobs[jobNumber]['DEFO'].update( { 'presets' : {} } )
 					
 					for row in defoParam: 
@@ -219,7 +219,7 @@ with open('Parameters.csv','r') as Input_Params:
 						break
 					
 				with open(PathToDefault+'/SU/Parameters_su.csv','r') as Su_Params:
-					suParam = csv.reader(Su_Params, delimiter='|', skipinitialspace=True)
+					suParam = csv.reader(Su_Params, delimiter=',', skipinitialspace=True)
 					Jobs[jobNumber]['SU'].update( { 'presets' : {} } )
 					for row in suParam: 
 						firstCol = row[0].strip(' ')
@@ -255,11 +255,11 @@ with open('Parameters.csv','r') as Input_Params:
 				for index, protocol in enumerate(row[1:]):
 					if 'DEFO' in Jobs[jobNumber] and protocol == 'DEFO':
 						defoProtocol = row[index+2].strip(',')
-						Jobs[jobNumber]['DEFO'].update( {'defoProtocol' : defoProtocol.split(',')} )
+						Jobs[jobNumber]['DEFO'].update( {'defoProtocol' : defoProtocol.split('+')} )
 						
 					if 'SU' in Jobs[jobNumber] and protocol == 'SU':
 						suProtocol = row[index+2].strip(',')
-						Jobs[jobNumber]['SU'].update( {'suProtocol' : suProtocol.split(',')} )
+						Jobs[jobNumber]['SU'].update( {'suProtocol' : suProtocol.split('+')} )
 					
 				continue
 			
@@ -391,7 +391,7 @@ InitForCopy={}
 if(sys.argv[1] == '--tgcc'):
 	#Read informations provided in TGCCinfo.csv if the option --tgcc is used
 	with open('TGCCinfo.csv','r') as TGCCinfo:
-		Reader = csv.reader(TGCCinfo, delimiter='|',skipinitialspace=True)
+		Reader = csv.reader(TGCCinfo, delimiter=',',skipinitialspace=True)
 		for row in Reader:
 			if Reader.line_num == 1:
 				continue
@@ -419,7 +419,6 @@ if(sys.argv[1] == '--tgcc'):
 						# IN Parameters.csv and TGCCinfo.csv ARE CONSISTENT  ?
 						
 						module load {3}
-						alias gmx="gmx_mpi"
 						
 						""").format(ProjectName,name,TGCC['username'],TGCC['GMXversion'])
 		ScriptFile.write(Utility.RemoveUnwantedIndent(CopyToScratch))
@@ -509,7 +508,7 @@ if(sys.argv[1] == '--tgcc'):
 				#					STEP IS SAMPLE COPY
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
-					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']]['JOBID'] 
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
@@ -551,7 +550,7 @@ if(sys.argv[1] == '--tgcc'):
 					cmd = str("""gmx_mpi grompp -f {1}.mdp -po {2}-{1}_out.mdp -c {3} -p {2}.top -maxwarn 10 -o {2}_{5}-{1}.tpr -n {4} &> grompp_out/grompp_{5}_{1}.output\n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], PrevCmdFiles['OUTPUT'], PrevCmdFiles['INDEX'],Jobs[sampleNumber]['JOBNUM'])
 					ScriptFile.write(cmd)
 
-					cmd = str("""ccc_mdrun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
+					cmd = str("""ccc_mprun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
 					ScriptFile.write(cmd)
 
 					cmd = str("""echo '{0} done' >> {1}_SoFar.txt\n\n\n""").format(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'],name)
@@ -574,7 +573,7 @@ if(sys.argv[1] == '--tgcc'):
 					cmd = str("""gmx_mpi grompp -f {1}.mdp -po {2}-{1}_out.mdp -c {3} -p {2}.top -maxwarn 10 -o {2}_{5}-{1}.tpr -n {4} &> grompp_out/grompp_{5}_{1}.output\n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], PrevCmdFiles['OUTPUT'], PrevCmdFiles['INDEX'],Jobs[sampleNumber]['JOBNUM'])
 					ScriptFile.write(cmd)
 
-					cmd = str("""ccc_mdrun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
+					cmd = str("""ccc_mprun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
 					ScriptFile.write(cmd)
 
 					cmd = str("""echo '{0} done' >> {1}_SoFar.txt\n\n\n""").format(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'],name)
@@ -599,7 +598,7 @@ if(sys.argv[1] == '--tgcc'):
 					cmd = str("""gmx_mpi grompp -f {1}.mdp -po {2}-{1}_out.mdp -c {3} -p {2}.top -maxwarn 10 -o {2}_{5}-{1}.tpr -n {4} &> grompp_out/grompp_{5}_{1}.output\n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], PrevCmdFiles['OUTPUT'], PrevCmdFiles['INDEX'],Jobs[sampleNumber]['JOBNUM'])
 					ScriptFile.write(cmd)
 
-					cmd = str("""ccc_mdrun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
+					cmd = str("""ccc_mprun gmx_mpi mdrun {4} -deffnm {2}_{3}-{1}  -c {2}_{3}-{1}_out.gro &> mdrun_out/mdrun_{3}_{1}.output \n\n""").format(GROMACS_REM_prefixPath, Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], PrevCmdFiles['SYSTEM'], Jobs[sampleNumber]['JOBNUM'], Jobs[sampleNumber]['MDRUN_OPT'])
 					ScriptFile.write(cmd)
 
 					cmd = str("""echo '{0} done' >> {1}_SoFar.txt\n\n\n""").format(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'],name)
@@ -626,8 +625,6 @@ if(sys.argv[1] == '--tgcc'):
 						#MSUB -r {0}	  # job name (automatically generated)
 						#MSUB -A {4} 	  # group for allocation (gen7662) (in TgccInfo.csv, key "group")
 						#MSUB -V          # transfer the variable of ENVIRONNEMENT
-						#MSUB -m be       # email at begin and at end
-						#MSUB -M {1}      # email address
 						#MSUB -oe %I.eo   # input and output of JOB
 						
 						# the number of nodes is deduced automatically from the number of cores (fixed nb core/node = 16 on curie noeud fin)
@@ -635,30 +632,31 @@ if(sys.argv[1] == '--tgcc'):
 						
 						echo "===================== BEGIN JOB $SLURM_JOBID =============================== "
 						
-						JOBINFO=$SLURM_SUBMIT_DIR/$SLURM_JOB_NAME-$SLURM_JOBID.jobinfo"
-						printf "Time =  `date`\\n" > $JOBINFO
-						printf "SLURM submit directory = $SLURM_SUBMIT_DIR\\n" >> $JOBINFO
-						printf "TGCC queue = {2}, user {4}, max time = {5} seconds \\n" >> $JOBINFO
-						printf "SLURM job ID = $SLURM_JOBID \\n" >> $JOBINFO
-						printf "SLURM job name = $SLURM_JOB_NAME \\n" >> $JOBINFO
-						printf "This job will run on {3} processors\\n" >> $JOBINFO
-						printf "List of nodes : $SLURM_NODEID \\n\\n" >> $JOBINFO
+						JOBINFO="${{SLURM_SUBMIT_DIR}}/${{SLURM_JOB_NAME}}-${{SLURM_JOBID}}.jobinfo"
+						printf "Time =  `date`\\n" > ${{JOBINFO}}
+						printf "SLURM submit directory = ${{SLURM_SUBMIT_DIR}}\\n" >> ${{JOBINFO}}
+						printf "TGCC queue = {2}, user {4}, max time = {5} seconds \\n" >> ${{JOBINFO}}
+						printf "SLURM job ID = ${{SLURM_JOBID}} \\n" >> ${{JOBINFO}}
+						printf "SLURM job name = ${{SLURM_JOB_NAME}} \\n" >> ${{JOBINFO}}
+						printf "This job will run on {3} processors\\n" >> ${{JOBINFO}}
+						printf "List of nodes : ${{SLURM_NODEID}} \\n\\n" >> ${{JOBINFO}}
 						
 						
-						export MYTMPDIR="$SCRATCHDIR/JOB_$SLURM_JOBID"
-						export OUTPUTDIR="$SLURM_SUBMIT_DIR/JOB_$SLURM_JOBID_OUTPUT
+						export MYTMPDIR="${{SCRATCHDIR}}/JOB_${{SLURM_JOBID}}"
+						export OUTPUTDIR="${{SLURM_SUBMIT_DIR}}/JOB_${{SLURM_JOBID}}_OUTPUT"
 						
-						mkdir -p $MYTMPDIR
-						mkdir -p $OUTPUTDIR
+						mkdir -p ${{MYTMPDIR}}
+						mkdir -p ${{OUTPUTDIR}}
 						
-						rsync $SLURM_SUBMIT_DIR/* $MYTMPDIR 
-						cd $MYTMPDIR ./run.sh  > $OUTPUTDIR/JOB_$SLURM_JOBID.out
-						rsync -r ./* $OUTPUTDIR/.
-						cd $SLURM_SUBMIT_DIR
-						rm -rf $MYTMPDIR
+						rsync ${{SLURM_SUBMIT_DIR}}/* ${{MYTMPDIR}} 
+						cd ${{MYTMPDIR}} 
+						./run.sh  > ${{OUTPUTDIR}}/JOB_${{SLURM_JOBID}}.out
+						rsync -r ./* ${{OUTPUTDIR}}/.
+						cd ${{SLURM_SUBMIT_DIR}}
+						rm -rf ${{MYTMPDIR}}
 						
 						echo "===================== END  JOB $SLURM_JOBID =============================== "
-						""").format(ProjectName+'_'+name+'__'+PrevCmdFiles['SYSTEM']+'__'+SoftwareVersion, TGCC['mail'], TGCC['queue'], Jobs[sampleNumber]['ppn'],TGCC['group'],TGCC['time_s'])
+						""").format(name, TGCC['mail'], TGCC['queue'], Jobs[sampleNumber]['ppn'],TGCC['group'],TGCC['time_s'])
 			f = open(name+'.ccc_msub','w')
 			f.write( Utility.RemoveUnwantedIndent(TGCCfile) )
 			f.close()
@@ -666,17 +664,7 @@ if(sys.argv[1] == '--tgcc'):
 			#**********************************************#
 			# End Creating TGCC files  **************#
 			#**********************************************#
-			#
-			## ALREADY DONE IN THE MSUB SCRIPT
-			#
-			#CopyToScratch = str("""
-							#echo "End of run for {1}"
-							#cp -r /scratch/{2}/gromacs/{0}/{1} ${{LOCALDIR}}/{1}_OUTPUT
-							#rm -r /scratch/{2}/gromacs/{0}
-							#""").format(ProjectName, name, TGCC['username'])
-			#ScriptFile.write(Utility.RemoveUnwantedIndent(CopyToScratch) )
-		ScriptFile.close()
-		
+			
 		EMdefault.close()
 		NVTdefault.close()
 		NPTdefault.close()
@@ -699,7 +687,8 @@ if(sys.argv[1] == '--tgcc'):
 			qsubCmd = str("""cd {0} \n ccc_msub {0}.ccc_msub \n cd .. \n""").format(name)
 			ScriptForJobs.write(qsubCmd)
 
-		ScriptForJobs.write( str("""ccc_mpp -u {0}""").format(TGCC['username']) )
+		ScriptForJobs.write( str("""ccc_mpp -u {0}\n\n""").format(TGCC['username']) )
+		ScriptForJobs.write( str("""echo ' To follow you JOBS, type ccc_mpp -u {0} ' \n """).format(TGCC['username']) )
 		ScriptForJobs.close()
 		sub.call("""chmod a+x SendToSLURM.sh""",shell=True)
 	
@@ -721,7 +710,7 @@ if(sys.argv[1] == '--tgcc'):
 if(sys.argv[1] == '--pbs'):
 	#Read informations provided in PBSinfo.csv if the option --pbs is used
 	with open('PBSinfo.csv','r') as PBSinfo:
-		Reader = csv.reader(PBSinfo, delimiter='|',skipinitialspace=True)
+		Reader = csv.reader(PBSinfo, delimiter=',',skipinitialspace=True)
 		for row in Reader:
 			if Reader.line_num == 1:
 				continue
@@ -837,7 +826,7 @@ if(sys.argv[1] == '--pbs'):
 				#					STEP IS SAMPLE COPY
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
-					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber']]['JOBID'] 
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
@@ -1142,12 +1131,11 @@ if(sys.argv[1] == '--local'):
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
 					continue
 
-				#============================================================
+				#=============d===============================================
 				#					STEP IS SAMPLE COPY
 				#============================================================
 				if(Jobs[sampleNumber]['PROTOCOL'][step]['stepType'].startswith('COPY')):
-
-					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID']
+					CopyFrom = Jobs[ Jobs[sampleNumber]['PROTOCOL'][step]['samplenumber'] ]['JOBID'] 
 					Prepare.CopySample(CopyFrom)
 					SoFar.write(  str("""{0} {1} done \n\n""").format( Jobs[sampleNumber]['PROTOCOL'][step]['stepType'], CopyFrom) )
 					PrevCmdFiles = copy.deepcopy(InitForCopy)
@@ -1305,4 +1293,3 @@ if(sys.argv[1] == '--local'):
 	# Copy Parameters.csv to project dir  *****#
 	#**********************************************#
 	sub.call('cp Parameters.csv '+ProjectName,shell=True)
-
